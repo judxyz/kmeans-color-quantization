@@ -1,0 +1,7 @@
+.clangd
+CMakeLists.txt
+build/
+
+main.exe
+test.cpp
+test.exe
