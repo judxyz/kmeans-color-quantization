@@ -1,5 +1,4 @@
 .clangd
-CMakeLists.txt
 build/
 
 main.exe
