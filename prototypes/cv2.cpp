@@ -4,6 +4,8 @@
 #include <string>
 #include <set>
 #include <vector>
+#include <fstream>
+#include <chrono>
 
 #include <opencv2/core.hpp>
 #include <opencv2/core/utils/logger.hpp>
@@ -26,14 +28,26 @@ struct Vec3bLess
     }
 };
 
-int main(int /*argc*/, char** /*argv*/) {
+int main(int argc, char** argv) {
     //set log level for opencv
     cv::utils::logging::setLogLevel(
         cv::utils::logging::LOG_LEVEL_SILENT
     );
 
+    if (argc < 3) {
+        cerr << "Usage: " << argv[0] << " <filepath> <k>\n";
+        return 1;
+    }
+
     string image_path;
-    image_path = "../../image.jpeg";
+    image_path = argv[1];
+
+    ifstream file(image_path);
+    if (!file.is_open()) {
+        cerr << "Error could not open file at " << image_path << endl;
+        return 1;
+    }
+
     
     Mat img = imread(image_path, IMREAD_COLOR);
     // OpenCV loads in image in BGR, but k means algorithm will group colors no matter the ordering of pixel values
@@ -74,8 +88,12 @@ int main(int /*argc*/, char** /*argv*/) {
     // kmeans returns one 3-component floating-point center per cluster.
     Mat centers; // 100 rows x 3 columns, CV_32F
 
+    int k; 
+    k = stoi(argv[2]);
+    
+    auto start_serial = chrono::high_resolution_clock::now();
 
-    double compactness = kmeans(img_data, 5, labels,
+    double compactness = kmeans(img_data, k, labels,
             TermCriteria( TermCriteria::EPS+TermCriteria::COUNT, 10, 1.0),
                3, KMEANS_PP_CENTERS, centers);
     // compactness: sum of squared distances
@@ -84,6 +102,13 @@ int main(int /*argc*/, char** /*argv*/) {
     // EPS: 1.0 pixel
     // 3 attempts
 
+    auto end_serial = chrono::high_resolution_clock::now();
+
+    auto duration_serial = chrono::duration_cast<chrono::milliseconds>(end_serial-start_serial);
+    cout << "Time taken for kmeans algorithm (in ms): " << duration_serial.count() << endl;
+
+
+   
     cout << centers << endl;
 
     // apply BGR values of cluster centers to all pixels
@@ -109,8 +134,8 @@ int main(int /*argc*/, char** /*argv*/) {
     imshow("Display window", new_img);
 
 
-    int k = waitKey(0);
-    if (k== 's')
+    int key = waitKey(0);
+    if (key== 's')
     {
         imwrite("../../new_image.jpeg", img);
     }

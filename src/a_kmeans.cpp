@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <chrono>
+
 
 #include <opencv2/core.hpp>
 #include <opencv2/core/utils/logger.hpp>
@@ -188,7 +190,18 @@ int main(int argc, char** argv) {
     Mat centers;
     centers = Mat::zeros(k, 1, CV_32FC3); // fill with k zeros
 
+
+    auto start_serial = chrono::high_resolution_clock::now();
+
     KMeans.calculate_kmeans(pixels, centers, assignments, k, iterations, eps);
+
+    auto end_serial = chrono::high_resolution_clock::now();
+
+    auto duration_serial = chrono::duration_cast<chrono::milliseconds>(end_serial-start_serial);
+    cout << "Time taken for kmeans algorithm (in ms): " << duration_serial.count() << endl;
+
+
+
 
     cout << centers << endl;
     cout << assignments[0].size() << endl;

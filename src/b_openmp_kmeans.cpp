@@ -115,10 +115,15 @@ class KMeans{
 
             fill(num_points_per_cluster.begin(), num_points_per_cluster.end(), 0);
 
-
             // OMP - use local partial sums
             #pragma omp parallel 
             {
+                // print # of threads here
+                if (omp_get_thread_num() == 0) {
+                    printf("Running with %d threads \n", omp_get_num_threads());
+                }
+
+                
                 // variables declared inside #pragma omp parallel are private to each thread
                 vector<Vec3f> local_sums(k, Vec3f(0, 0, 0));
                 vector<int> local_counts(k, 0);
@@ -194,8 +199,8 @@ int main(int argc, char** argv) {
         cv::utils::logging::LOG_LEVEL_SILENT
     );
 
-    if (argc < 3) {
-        cerr << "Usage: " << argv[0] << " <filepath> <k>\n";
+    if (argc < 4) {
+        cerr << "Usage: " << argv[0] << " <filepath> <k> <iterations> \n";
         return 1;
     }
 
@@ -245,7 +250,8 @@ int main(int argc, char** argv) {
 
     int k;
     k = stoi(argv[2]);
-    int iterations = 5;
+    int iterations;
+    iterations = stoi(argv[3]);
     float eps = 0.1;
     vector<int> labels(img.total()); // 2d array for each center point
     cout << labels.size() << " " << pixels.size() << endl;
@@ -255,7 +261,9 @@ int main(int argc, char** argv) {
     centers = Mat::zeros(k, 1, CV_32FC3); // fill with k zeros
 
 
-    auto start_serial = chrono::high_resolution_clock::now();
+    auto start_serial =     set OMP_NUM_THREADS=10
+    echo %OMP_NUM_THREADS%
+    .\build\Debug\color_quantization.exe C:\path\image.jpeg 5 5;
 
     KMeans.calculate_kmeans(pixels, centers, labels, k, iterations, eps);
 
