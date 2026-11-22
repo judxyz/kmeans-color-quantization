@@ -225,10 +225,12 @@ int main(int argc, char** argv) {
     
 
     int key = waitKey(0);
+    string output_path = "after_" + string(argv[1]);
+
     if (key == 's')
     {
-        imwrite(argv[1], img);
+        imwrite(output_path, img);
+        cout << "Successfully saved image" << endl;
     }
-    return 0;
 }
 

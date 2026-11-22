@@ -1,5 +1,6 @@
 #include <array>
 #include <cmath>
+#include <filesystem>
 #include <iostream>
 #include <limits>
 #include <opencv2/core/mat.hpp>
@@ -293,9 +294,20 @@ int main(int argc, char** argv) {
     
 
     int key = waitKey(0);
+    
+
     if (key == 's')
     {
-        imwrite(argv[1], img);
+        filesystem::path input_path(argv[1]);
+        filesystem::path output_path = input_path.parent_path() / ("after_" + input_path.filename().string());
+        cout << output_path << endl;
+        if (imwrite(output_path.string(), new_img)) {
+            cout << "Successfully saved image" << endl;
+        } else {
+            cout << "!! Failed to save image" << endl;
+
+        }
+        
     }
     return 0;
 }

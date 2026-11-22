@@ -24,13 +24,38 @@ And update `option(USE_OPENMP "Build with OpenMP" [ON/OFF])` in CMakeLists.txt
 
 
 ### Benchmarks after parallelization
-After parallelizing with OpenMP, the running time (benchmarked with chrono time library) had an average speedup of 4.45x:
+After parallelizing with OpenMP, the running time (benchmarked with chrono time library):
 
-* Running parallelized `openmp_kmeans.cpp` on `image.jpeg` 5 times (in ms) = 260, 272, 258, 241, 248 = average 255.8 ms
+`image1.jpg` 306364 total pixels --> speedup of 4.45x
+* Running parallelized `b_openmp_kmeans.cpp` on `image.jpeg` 5 times (in ms) = 260, 272, 258, 241, 248 = average 255.8 ms
+* Running normal `b_openmp_kmeans.cpp` on `image.jpeg` 5 times (in ms) = 1139, 1098, 1210, 1147, 1092 = average 1137.2 ms
 
-* Running normal `openmp_kmeans.cpp` on `image.jpeg` 5 times (in ms) = 1139, 1098, 1210, 1147, 1092 = average 1137.2 ms
+
+`image2.jpg` 634880 total pixels --> speedup of 4.66x
+* Running parallelized `b_openmp_kmeans.cpp` on `image2.jpg` 5 times (in ms) = 528, 524, 491, 509, 493 = average 509.0 ms
+* Running normal `b_openmp_kmeans.cpp` on `image.jpg` 5 times (in ms) = 2307, 2376, 2383, 2614, 2192 = average 2374.4 ms
 
 
+
+### Example images:
+#### `image.jpeg`
+Before:
+
+![alt text](image.jpeg)
+
+After:
+
+![alt text](after_image.jpeg)
+
+#### `image2.jpg`
+
+Before:
+
+![alt text](image2.jpg)
+
+After:
+
+![alt text](after_image2.jpg)
 
 ### References + Credits
 https://stackoverflow.com/questions/49710006/fast-color-quantization-in-opencv
