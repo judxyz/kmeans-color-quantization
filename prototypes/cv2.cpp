@@ -6,6 +6,7 @@
 #include <vector>
 #include <fstream>
 #include <chrono>
+#include <numeric>
 
 #include <opencv2/core.hpp>
 #include <opencv2/core/utils/logger.hpp>
@@ -106,6 +107,33 @@ int main(int argc, char** argv) {
 
     auto duration_serial = chrono::duration_cast<chrono::milliseconds>(end_serial-start_serial);
     cout << "Time taken for kmeans algorithm (in ms): " << duration_serial.count() << endl;
+
+    // --- Timed runs
+    const int NUM_RUNS = 20;
+    vector<double> times;
+
+    for (int i = 0; i < NUM_RUNS; i++) {
+        auto start_serial = chrono::high_resolution_clock::now();
+        double compactness = kmeans(img_data, k, labels,
+            TermCriteria( TermCriteria::EPS+TermCriteria::COUNT, 10, 1.0),
+               3, KMEANS_PP_CENTERS, centers);        
+        auto end_serial = chrono::high_resolution_clock::now();
+
+        auto duration_serial = chrono::duration_cast<chrono::milliseconds>(end_serial-start_serial);
+        
+        times.push_back(duration_serial.count());
+
+
+    }
+
+    
+    // --- Reports
+    sort(times.begin(), times.end());
+    
+    
+    cout << "Best time (in ms): " << times.front() << endl;
+    cout << "Median time (in ms): " << times[NUM_RUNS / 2] << endl;
+    cout << "Mean time (in ms): " << accumulate(times.begin(), times.end(), 0.0) / times.size() << endl;
 
 
    

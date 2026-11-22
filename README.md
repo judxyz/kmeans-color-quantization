@@ -17,27 +17,11 @@ cmake -B build -DUSE_OPENMP=OFF
 cmake --build build
 
 # Run
-.\build\Debug\color_quantization.exe <full_path_to_image> <K>                                                                                                                                                                                                                      
+.\build\Debug\color_quantization.exe <full_path_to_image> <K> <num_iterations>
 ```
 
 And update `option(USE_OPENMP "Build with OpenMP" [ON/OFF])` in CMakeLists.txt
 
-
-### Benchmarks
-This was the running time (benchmarked with chrono time library):
-
-`image1.jpg` 306364 total pixels, K = 5, iterations = 5, running with 12 cores --> speedup of 4.45x
-* Running parallelized `b_openmp_kmeans.cpp` on `image.jpeg` 5 times (in ms) = 260, 272, 258, 241, 248 = average 255.8 ms
-* Running normal `b_openmp_kmeans.cpp` on `image.jpeg` 5 times (in ms) = 1139, 1098, 1210, 1147, 1092 = average 1137.2 ms
-* Using OpenCV's cv2.kmeans() function I got 1154 ms.
-
-`image2.jpg` 634880 total pixels, K = 5, iterations = 5, running with 12 cores --> speedup of 4.66x
-* Running parallelized `b_openmp_kmeans.cpp` on `image2.jpg` 5 times (in ms) = 528, 524, 491, 509, 493 = average 509.0 ms
-* Running normal `b_openmp_kmeans.cpp` on `image.jpg` 5 times (in ms) = 2307, 2376, 2383, 2614, 2192 = average 2374.4 ms
-* Using OpenCV's cv2.kmeans() function I got 2170 ms.
-
-### Hyperthreading?
-?
 
 ### Example images:
 K = 5 
@@ -59,6 +43,73 @@ Before:
 After:
 
 ![alt text](images/after_image2.jpg)
+
+
+### Benchmarks
+This was the running time (benchmarked with chrono time library):
+
+`image.jpeg`: 306364 total pixels, K = 5, iterations = 5, running with 12 cores --> for median time, the program achieved a speedup of 4.00x over normal, and 4.58x over cv2.kmeans()
+* Running parallelized `b_openmp_kmeans.cpp` on `image.jpeg` 20 times: 
+    * Best time (in ms): 227
+    * Median time (in ms): 239
+    * Mean time (in ms): 243.5
+* Running normal `b_openmp_kmeans.cpp` on `image.jpeg` 20 times:
+    * Best time (in ms): 893
+    * Median time (in ms): 957
+    * Mean time (in ms): 970.55
+* Using OpenCV's cv2.kmeans() function `cv2.cpp` 20 times: 
+    * Best time (in ms): 953
+    * Median time (in ms): 1094
+    * Mean time (in ms): 1151.9
+
+`image2.jpg`: 634880 total pixels, K = 5, iterations = 5, running with 12 cores --> for median time, the program achieved a speedup of 4.10x over normal, and 5.14x over cv2.kmeans()
+* Running parallelized `b_openmp_kmeans.cpp` on `image2.jpg` 20 times (in ms):
+    * Best time (in ms): 473
+    * Median time (in ms): 491
+    * Mean time (in ms): 505.65
+* Running normal `b_openmp_kmeans.cpp` on `image.jpg` 20 times (in ms):
+    * Best time (in ms): 1804
+    * Median time (in ms): 2015
+    * Mean time (in ms): 2016.75
+* Using OpenCV's cv2.kmeans() function `cv2.cpp` 20 times:
+    * Best time (in ms): 2190
+    * Median time (in ms): 2526
+    * Mean time (in ms): 2699.4
+
+### Larger image
+I hypothesized a larger image would allow for more speedup and decrease the impact of having to allocate threads and overhead when using OpenMP
+
+
+`4k_image.jpg`
+14897670 total pixels, averaged over 5 trials, iterations = 5, k = 5
+
+With OpenMP:
+* Best time (in ms): 10432
+* Median time (in ms): 12031
+* Mean time (in ms): 11922.6
+
+Without:
+* Best time (in ms): 48766
+* Median time (in ms): 54415
+* Mean time (in ms): 60450.4
+
+54415/12031 = 4.5x speedup for median time
+
+### increased K = 12
+`image.jpeg` with iterations =5, k =12
+
+With OpenMP:
+* Best time (in ms): 481
+* Median time (in ms): 488
+* Mean time (in ms): 487.2
+
+Without:
+* Best time (in ms): 2234
+* Median time (in ms): 2281
+* Mean time (in ms): 2276.2
+
+2281/488 = 4.67x speedup, which is a big differnce from the 4.00x difference above.
+
 
 ### References + Credits
 https://stackoverflow.com/questions/49710006/fast-color-quantization-in-opencv
