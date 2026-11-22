@@ -1,17 +1,13 @@
-#include <algorithm>
 #include <array>
 #include <cmath>
-#include <cstddef>
 #include <iostream>
 #include <limits>
-#include <memory>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/matx.hpp>
 #include <opencv2/core/utility.hpp>
 #include <string>
-#include <set>
 #include <vector>
-#include <limits.h>
+#include <fstream>
 
 #include <opencv2/core.hpp>
 #include <opencv2/core/utils/logger.hpp>
@@ -75,7 +71,8 @@ class KMeans{
     void calculate_kmeans(vector<Pixel>& pixels, Mat centers,  vector<vector<Pixel*>>& assignments, int k, int iterations, float EPS) {
         float current_eps = numeric_limits<float>::max();
 
-        // 1. randomly select k cluster centroids from all pixels
+        // 1. initialization
+        // randomly select k cluster centroids from all pixels
 
         RNG rng(getTickCount()); // OpenCV's random number generator
 
@@ -96,13 +93,15 @@ class KMeans{
             for (auto& row: assignments) {
                 row.clear();
             }
-            // 2. iterate through points
+            // 2. e-step/reassigning points: 
+            // iterate through points
             for (int i = 0; i < pixels.size(); i++) {
                 int closest_center = pixels[i].findClosestCentroid(centers);
                 assignments[closest_center].push_back(&pixels[i]);
             }
 
-            // 3. recalculate the centroid of the cluster by averaging all points inside that cluster
+            // 3. m-step/moving centroids
+            // recalculate the centroid of the cluster by averaging all points inside that cluster
             for (int k = 0; k < assignments.size(); k++) {
                 float b, g, r;
                 b = g = r = 0.0f;
@@ -126,14 +125,26 @@ class KMeans{
 };
 
 
-int main(int /*argc*/, char** /*argv*/) {
+int main(int argc, char** argv) {
     //set log level for opencv
     cv::utils::logging::setLogLevel(
         cv::utils::logging::LOG_LEVEL_SILENT
     );
 
+    if (argc < 2) {
+        cerr << "Usage: " << argv[0] << "<filepath> \n";
+        return 1;
+    }
+
     string image_path;
-    image_path = "../../image.jpeg"; // TODO: change to be argv
+    image_path = argv[1];
+
+    ifstream file(image_path);
+    if (!file.is_open()) {
+        cerr << "Error could not open file at " << image_path << endl;
+        return 1;
+    }
+
     
     Mat img8u = imread(image_path, IMREAD_COLOR); // opencv default reads in as 8UC3
     Mat img;
@@ -165,7 +176,7 @@ int main(int /*argc*/, char** /*argv*/) {
 
 
 
-    /////// perform K means algo
+    // ---- perform K means algorithm
 
     KMeans KMeans;
 
@@ -176,8 +187,6 @@ int main(int /*argc*/, char** /*argv*/) {
     Mat centers;
     centers = Mat::zeros(k, 1, CV_32FC3); // fill with k zeros
 
-
-    // TODO: get compactness
     KMeans.calculate_kmeans(pixels, centers, assignments, k, iterations, eps);
 
     cout << centers << endl;
@@ -218,7 +227,7 @@ int main(int /*argc*/, char** /*argv*/) {
     int key = waitKey(0);
     if (key == 's')
     {
-        imwrite("../../new_image.jpeg", img);
+        imwrite(argv[1], img);
     }
     return 0;
 }
